@@ -2,15 +2,105 @@ function onInstall(e) {
   // Perform additional setup as needed.
 }
 
+var coinbaseData = null; //Hold wallets with balances
+
 /**
-* Retrieve current balance in native currency, e.g. EUR, from your Coinbase.com Ether wallet.
-* @see https://developers.coinbase.com/docs/wallet/api-key-authentication 
+* Get current balance in native currency, e.g. EUR, from your Coinbase.com Ether wallet.
 */
 function getCoinbaseEther(coinbaseApiKey, coinbaseApiSecret) {
     
+  if(coinbaseData === null) {
+    if(!getCoinbaseData(coinbaseApiKey, coinbaseApiSecret)) {
+      return 'Please set Coinbase API Key and Secret in "Settings" first.';
+    }
+  }
+  
+  //Read wallets
+  Object.keys(coinbaseData).forEach(function(key) {
+    
+    var wallet = coinbaseData[key];
+    
+    //Look for ETH wallet
+    if(wallet.name == 'ETH Wallet') {
+      native_balance = parseFloat(wallet.native_balance.amount);
+      return native_balance;
+    }
+        
+  });
+
+  //Shouldn't happen
+  return native_balance;
+  
+}
+
+
+/**
+* Get current balance in native currency, e.g. EUR, from your Coinbase.com Bitcoin wallet.
+*/
+function getCoinbaseBitcoin(coinbaseApiKey, coinbaseApiSecret) {
+    
+  if(coinbaseData === null) {
+    if(!getCoinbaseData(coinbaseApiKey, coinbaseApiSecret)) {
+      return 'Please set Coinbase API Key and Secret in "Settings" first.';
+    }
+  }
+  
+  //Read wallets
+  Object.keys(coinbaseData).forEach(function(key) {
+    
+    var wallet = coinbaseData[key];
+    
+    //Look for BTC wallet
+    if(wallet.name == 'BTC Wallet') {
+      native_balance = parseFloat(wallet.native_balance.amount);
+      return native_balance;
+    }
+        
+  });
+
+  //Shouldn't happen
+  return native_balance;
+  
+}
+
+/**
+* Get current balance from your Coinbase.com EUR wallet.
+*/
+function getCoinbaseEuro(coinbaseApiKey, coinbaseApiSecret) {
+    
+  if(coinbaseData === null) {
+    if(!getCoinbaseData(coinbaseApiKey, coinbaseApiSecret)) {
+      return 'Please set Coinbase API Key and Secret in "Settings" first.';
+    }
+  }
+  
+  //Read wallets
+  Object.keys(coinbaseData).forEach(function(key) {
+    
+    var wallet = coinbaseData[key];
+    
+    //Look for EUR wallet
+    if(wallet.name == 'EUR Wallet') {
+      native_balance = parseFloat(wallet.native_balance.amount);
+      return native_balance;
+    }
+        
+  });
+
+  //Shouldn't happen
+  return native_balance;
+  
+}
+
+/**
+* Retrieve wallets and current balances from Coinbase.com
+* @see https://developers.coinbase.com/docs/wallet/api-key-authentication 
+*/
+function getCoinbaseData(coinbaseApiKey, coinbaseApiSecret) {
+  
   //API credentials missing
   if(coinbaseApiKey == 'enter your API key' || coinbaseApiSecret == 'enter your API secret') {
-    return 'Please set Coinbase API Key and Secret in "Settings" first.';
+    return false;
   }
   
   //Fallback return value
@@ -33,7 +123,7 @@ function getCoinbaseEther(coinbaseApiKey, coinbaseApiSecret) {
   var signatureHexHash = signatureByteHash.reduce(function(str,chr){ //Convert to hex
     chr = (chr < 0 ? chr + 256 : chr).toString(16);
     return str + (chr.length==1?'0':'') + chr;
-  },'');;
+  },'');
   
   //Make request and get JSON
   var requestUrl = apiUrl + requestPath;
@@ -50,22 +140,6 @@ function getCoinbaseEther(coinbaseApiKey, coinbaseApiSecret) {
   
   //Pre-process
   var responseObj = JSON.parse(responseJson);
-  var data = responseObj.data;
-  
-  //Read wallets
-  Object.keys(data).forEach(function(key) {
-    
-    var wallet = data[key];
-    
-    //Look for ETH wallet
-    if(wallet.name == 'ETH Wallet') {
-      native_balance = wallet.native_balance.amount + ' ' + wallet.native_balance.currency;
-      return native_balance;
-    }
-        
-  });
-
-  //Shouldn't happen
-  return native_balance;
+  coinbaseData = responseObj.data;
   
 }
