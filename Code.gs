@@ -2,7 +2,13 @@ function onInstall(e) {
   // Perform additional setup as needed.
 }
 
-var coinbaseData = null; //Hold wallets with balances
+//Const and basic data
+var apiUrl = 'https://api.coinbase.com';
+var implementationDate = '2017-07-23';
+var date = new Date();
+var nonce = Math.floor((date.getTime()/1000)).toString();
+
+var coinbaseData = null; //Holds wallets with balances
 
 /**
 * Get current balance in native currency, e.g. EUR, from your Coinbase.com Ether wallet.
@@ -106,12 +112,6 @@ function getCoinbaseData(coinbaseApiKey, coinbaseApiSecret) {
   //Fallback return value
   var native_balance = 0.00;
   
-  //Const and basic data
-  var apiUrl = 'https://api.coinbase.com';
-  var implementationDate = '2017-07-23';
-  var date = new Date();
-  var nonce = Math.floor((date.getTime()/1000)).toString();
-
   //Build request
   var method = 'GET'; 
   var requestPath = '/v2/accounts'; //https://developers.coinbase.com/api/v2#list-accounts
@@ -141,5 +141,37 @@ function getCoinbaseData(coinbaseApiKey, coinbaseApiSecret) {
   //Pre-process
   var responseObj = JSON.parse(responseJson);
   coinbaseData = responseObj.data;
+  
+}
+
+/**
+* Retrieve prices at coinbase.com
+* @param currencyPair e.g. BTC-EUR see https://developers.coinbase.com/api/v2#prices for options
+* @param buySell 'buy' or 'sell'
+* @see https://developers.coinbase.com/api/v2#prices
+*/
+function getCoinbasePrice(currencyPair, buySell) {
+  
+  //Build request
+  var method = 'GET';
+  var requestPath = '/v2/prices/' + currencyPair + '/' + buySell; //https://developers.coinbase.com/api/v2#prices
+
+  Logger.log(implementationDate);
+  
+  //Make request and get JSON
+  var requestUrl = apiUrl + requestPath;
+  var params = {
+    'method': method,
+    'headers': {
+      'CB-VERSION': implementationDate //header which guarantees that your call is using the correct API version. Version is passed in as a date (UTC) of the implementation in YYYY-MM-DD format.
+    }
+  };
+  var responseJson = UrlFetchApp.fetch(requestUrl, params);
+  
+  //Pre-process
+  var responseObj = JSON.parse(responseJson);
+  
+  //Log
+  return parseFloat(responseObj.data.amount);
   
 }
