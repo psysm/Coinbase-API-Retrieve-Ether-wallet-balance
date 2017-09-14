@@ -2,12 +2,12 @@ function onInstall(e) {
   // Perform additional setup as needed.
 }
 
-var coinbaseData = null;
-var gdaxData = null;
+var coinbaseData = null; //Holds Coinbase wallets with balances
+var gdaxData = null; //Holds GDAX accounts with balances
 var native_balance = 0.0;
 
 /**
-* Retrieve current balance in native currency, e.g. EUR, from your Coinbase.com Ether wallet.
+* Get current balance in native currency, e.g. EUR, from your Coinbase.com Ether wallet.
 * @see https://developers.coinbase.com/docs/wallet/api-key-authentication 
 */
 function getCoinbaseEther(coinbaseApiKey, coinbaseApiSecret) {
@@ -36,7 +36,7 @@ function getCoinbaseEther(coinbaseApiKey, coinbaseApiSecret) {
 
 
 /**
-* Retrieve current balance in native currency, e.g. EUR, from your Coinbase.com Bitcoin wallet.
+* Get current balance in native currency, e.g. EUR, from your Coinbase.com Bitcoin wallet.
 * @see https://developers.coinbase.com/docs/wallet/api-key-authentication 
 */
 function getCoinbaseBitcoin(coinbaseApiKey, coinbaseApiSecret) {
@@ -64,7 +64,7 @@ function getCoinbaseBitcoin(coinbaseApiKey, coinbaseApiSecret) {
 }
 
 /**
-* Retrieve current balance from your Coinbase.com EUR wallet.
+* Get current balance from your Coinbase.com EUR wallet.
 * @see https://developers.coinbase.com/docs/wallet/api-key-authentication 
 */
 function getCoinbaseEuro(coinbaseApiKey, coinbaseApiSecret) {
@@ -144,7 +144,7 @@ function getCoinbaseData(coinbaseApiKey, coinbaseApiSecret) {
 }
 
 /**
-* Retrieve prices at coinbase.com
+* Retrieve prices from coinbase.com
 * @param currencyPair e.g. BTC-EUR see https://developers.coinbase.com/api/v2#prices for options
 * @param buySell 'buy' or 'sell'
 * @see https://developers.coinbase.com/api/v2#prices
@@ -176,7 +176,7 @@ function getCoinbasePrice(currencyPair, buySell) {
 }
 
 /**
-* Retrieve current balance from your GDAX EUR account.
+* Get current balance from your GDAX EUR account.
 * @see https://docs.gdax.com/#accounts
 */
 function getGdaxEuro(gdaxApiKey, gdaxApiSecret, gdaxApiPassphrase) {
@@ -204,7 +204,7 @@ function getGdaxEuro(gdaxApiKey, gdaxApiSecret, gdaxApiPassphrase) {
 }
 
 /**
-* Retrieve current balance from your GDAX ETH account in ETH.
+* Get current balance from your GDAX ETH account in ETH.
 * @see https://docs.gdax.com/#accounts
 */
 function getGdaxEther(gdaxApiKey, gdaxApiSecret, gdaxApiPassphrase) {
