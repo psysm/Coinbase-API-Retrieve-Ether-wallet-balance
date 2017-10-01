@@ -2,9 +2,16 @@ function onInstall(e) {
   // Perform additional setup as needed.
 }
 
+//Const and basic data
+var apiUrl = 'https://api.coinbase.com';
+var apiUrlGdax = 'https://api.gdax.com';
+var implementationDate = '2017-07-23';
+var date = new Date();
+var nonce = Math.floor((date.getTime()/1000)).toString();
+
 var coinbaseData = null; //Holds Coinbase wallets with balances
 var gdaxData = null; //Holds GDAX accounts with balances
-var native_balance = 0.0;
+var native_balance = 0.0;  //Fallback return value
 
 /**
 * Get current balance in native currency, e.g. EUR, from your Coinbase.com Ether wallet.
@@ -13,7 +20,9 @@ var native_balance = 0.0;
 function getCoinbaseEther(coinbaseApiKey, coinbaseApiSecret) {
     
   if(coinbaseData === null) {
-    getCoinbaseData(coinbaseApiKey, coinbaseApiSecret);
+    if(!getCoinbaseData(coinbaseApiKey, coinbaseApiSecret)) {
+      return 'Please set Coinbase API Key and Secret in "Settings" first.'; 
+    }
   }
   
   //Read wallets
@@ -42,7 +51,9 @@ function getCoinbaseEther(coinbaseApiKey, coinbaseApiSecret) {
 function getCoinbaseBitcoin(coinbaseApiKey, coinbaseApiSecret) {
     
   if(coinbaseData === null) {
-    getCoinbaseData(coinbaseApiKey, coinbaseApiSecret);
+    if(!getCoinbaseData(coinbaseApiKey, coinbaseApiSecret)) {
+      return 'Please set Coinbase API Key and Secret in "Settings" first.'; 
+    }
   }
   
   //Read wallets
@@ -70,7 +81,9 @@ function getCoinbaseBitcoin(coinbaseApiKey, coinbaseApiSecret) {
 function getCoinbaseEuro(coinbaseApiKey, coinbaseApiSecret) {
     
   if(coinbaseData === null) {
-    getCoinbaseData(coinbaseApiKey, coinbaseApiSecret);
+    if(!getCoinbaseData(coinbaseApiKey, coinbaseApiSecret)) {
+      return 'Please set Coinbase API Key and Secret in "Settings" first.'; 
+    }
   }
   
   //Read wallets
@@ -98,19 +111,10 @@ function getCoinbaseEuro(coinbaseApiKey, coinbaseApiSecret) {
 function getCoinbaseData(coinbaseApiKey, coinbaseApiSecret) {
   
   //API credentials missing
-  if(coinbaseApiKey == 'enter your API key' || coinbaseApiSecret == 'enter your API secret') {
-    return 'Please set Coinbase API Key and Secret in "Settings" first.';
+  if(coinbaseApiKey == 'enter your Coinbase API key' || coinbaseApiSecret == 'enter your Coinbase API secret') {
+    return false;
   }
   
-  //Fallback return value
-  var native_balance = 0.00;
-  
-  //Const and basic data
-  var apiUrl = 'https://api.coinbase.com';
-  var implementationDate = '2017-07-23';
-  var date = new Date();
-  var nonce = Math.floor((date.getTime()/1000)).toString();
-
   //Build request
   var method = 'GET'; 
   var requestPath = '/v2/accounts'; //https://developers.coinbase.com/api/v2#list-accounts
@@ -141,6 +145,7 @@ function getCoinbaseData(coinbaseApiKey, coinbaseApiSecret) {
   var responseObj = JSON.parse(responseJson);
   coinbaseData = responseObj.data;
   
+  return true;
 }
 
 /**
@@ -182,7 +187,9 @@ function getCoinbasePrice(currencyPair, buySell) {
 function getGdaxEuro(gdaxApiKey, gdaxApiSecret, gdaxApiPassphrase) {
  
   if(gdaxData === null) {
-    getGdaxData(gdaxApiKey, gdaxApiSecret, gdaxApiPassphrase);
+    if(!getGdaxData(gdaxApiKey, gdaxApiSecret, gdaxApiPassphrase)) {
+      return 'Please set GDAX API Key and Secret in "Settings" first.'; 
+    }   
   }
   
   //Read accounts
@@ -210,7 +217,9 @@ function getGdaxEuro(gdaxApiKey, gdaxApiSecret, gdaxApiPassphrase) {
 function getGdaxEther(gdaxApiKey, gdaxApiSecret, gdaxApiPassphrase) {
  
   if(gdaxData === null) {
-    getGdaxData(gdaxApiKey, gdaxApiSecret, gdaxApiPassphrase);
+    if(!getGdaxData(gdaxApiKey, gdaxApiSecret, gdaxApiPassphrase)) {
+      return 'Please set GDAX API Key and Secret in "Settings" first.'; 
+    }   
   }
   
   //Read accounts
@@ -218,8 +227,38 @@ function getGdaxEther(gdaxApiKey, gdaxApiSecret, gdaxApiPassphrase) {
 
     var account = gdaxData[a];
     
-    //Look for EUR wallet
+    //Look for ETH wallet
     if(account.currency == 'ETH') {
+      var balance = parseFloat(account.balance);
+      return balance;
+    }
+    
+  }
+  
+  //Shouldn't happen
+  return native_balance;
+  
+}
+
+/**
+* Get current balance from your GDAX BTC account in BTC.
+* @see https://docs.gdax.com/#accounts
+*/
+function getGdaxBitcoin(gdaxApiKey, gdaxApiSecret, gdaxApiPassphrase) {
+ 
+  if(gdaxData === null) {
+    if(!getGdaxData(gdaxApiKey, gdaxApiSecret, gdaxApiPassphrase)) {
+      return 'Please set GDAX API Key, Secret and Passphrase in "Settings" first.'; 
+    }   
+  }
+  
+  //Read accounts
+  for(var a=0; a<gdaxData.length; a++) {
+
+    var account = gdaxData[a];
+    
+    //Look for BTC wallet
+    if(account.currency == 'BTC') {
       var balance = parseFloat(account.balance);
       return balance;
     }
@@ -239,18 +278,13 @@ function getGdaxEther(gdaxApiKey, gdaxApiSecret, gdaxApiPassphrase) {
 function getGdaxData(gdaxApiKey, gdaxApiSecret, gdaxApiPassphrase) {
   
   //API credentials missing
-  if(gdaxApiKey == 'enter your API key' || gdaxApiSecret == 'enter your API secret' || gdaxApiPassphrase == 'enter your API passphrase') {
-    return 'Please set GDAX API Key and Secret in "Settings" first.';
+  if(gdaxApiKey == 'enter your GDAX API key' || gdaxApiSecret == 'enter your GDAX API secret' || gdaxApiPassphrase == 'enter your GDAX API passphrase') {
+    return false;
   }
   
   //Fallback return value
   var native_balance = 0.00;
   
-  //Const and basic data
-  var apiUrl = 'https://api.gdax.com';
-  var date = new Date();
-  var nonce = Math.floor((date.getTime()/1000)).toString();
-
   //Build request
   var method = 'GET'; 
   var requestPath = '/accounts'; //https://docs.gdax.com/#accounts
@@ -269,7 +303,7 @@ function getGdaxData(gdaxApiKey, gdaxApiSecret, gdaxApiPassphrase) {
   var signatureBase64 = signatureHash.toString(CryptoJS.enc.Base64);
 
   //Make request and get JSON
-  var requestUrl = apiUrl + requestPath;
+  var requestUrl = apiUrlGdax + requestPath;
   var params = {
     'method': method,
     'headers': {
@@ -284,6 +318,8 @@ function getGdaxData(gdaxApiKey, gdaxApiSecret, gdaxApiPassphrase) {
   //Pre-process
   var responseObj = JSON.parse(responseJson);
   gdaxData = responseObj;
+  
+  return true;
   
 }
 
